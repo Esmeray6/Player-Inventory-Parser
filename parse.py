@@ -126,6 +126,30 @@ def parse_mission(mission: str):
                     ] = item_data.get(
                         inventory["primaryWeapon"]["primaryMuzzleMag"]["name"]
                     )
+                if "flashlight" in inventory["primaryWeapon"]:
+                    inventory["primaryWeapon"]["flashlight"] = {
+                        "name": inventory["primaryWeapon"]["flashlight"],
+                        "displayName": item_data[
+                            inventory["primaryWeapon"]["flashlight"]
+                        ],
+                    }
+                if "muzzle" in inventory["primaryWeapon"]:
+                    inventory["primaryWeapon"]["muzzle"] = {
+                        "name": inventory["primaryWeapon"]["muzzle"],
+                        "displayName": item_data[inventory["primaryWeapon"]["muzzle"]],
+                    }
+                if "optics" in inventory["primaryWeapon"]:
+                    inventory["primaryWeapon"]["optics"] = {
+                        "name": inventory["primaryWeapon"]["optics"],
+                        "displayName": item_data[inventory["primaryWeapon"]["optics"]],
+                    }
+                if "underBarrel" in inventory["primaryWeapon"]:
+                    inventory["primaryWeapon"]["underBarrel"] = {
+                        "name": inventory["primaryWeapon"]["underBarrel"],
+                        "displayName": item_data[
+                            inventory["primaryWeapon"]["underBarrel"]
+                        ],
+                    }
             if "handgun" in inventory:
                 if "firemode" in inventory["handgun"]:
                     inventory["handgun"]["firemode"] = inventory["handgun"][
