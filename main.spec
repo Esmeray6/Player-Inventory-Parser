@@ -5,7 +5,7 @@ a = Analysis(
     ['main.py'],
     pathex=[],
     binaries=[],
-    datas=[("static/", "static"), ("templates/", "templates"), ("data_unorganized.json", ".")],
+    datas=[("static/", "static"), ("templates/", "templates"), ("./data_unorganized.json", ".")],
     hiddenimports=[],
     hookspath=[],
     runtime_hooks=[],
