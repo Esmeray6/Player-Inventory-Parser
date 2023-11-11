@@ -11,6 +11,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - run: mkdir -p dist/windows
+
       - uses: actions/checkout@v3
 
       - name: Package Application
