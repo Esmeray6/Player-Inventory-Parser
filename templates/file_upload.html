@@ -1,6 +1,6 @@
 <html>
   <head>
-    <title>File Upload</title>
+    <title>{{ mission_name }} inventories</title>
     <meta charset="utf-8" />
     <meta
       name="viewport"
@@ -18,7 +18,7 @@
     />
   </head>
   <body>
-    {% for key, value in response.items() %}
+    {% for value in response %}
       <div
         class="card"
         style="
@@ -31,7 +31,7 @@
       >
         <div class="card-body" style="padding: 0">
           <h5 class="card-title" style="margin: 1.25rem 0 1.25rem 1.25rem">
-            {{ key }}
+            {{ value.pop("description") }}
           </h5>
           <ul class="list-group list-group-flush">
             {% for key in value %}
@@ -91,6 +91,10 @@
                 {% elif key == "gps" %}
                   <h6 class="card-subtitle mb-2 text-muted">
                     Terminal — {{ value[key].displayName }}
+                  </h6>
+                {% elif key == "hmd" %}
+                  <h6 class="card-subtitle mb-2 text-muted">
+                    NVG — {{ value[key].displayName }}
                   </h6>
                 {% endif %}
                 {%

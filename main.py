@@ -1,3 +1,5 @@
+import os
+import sys
 from gevent import monkey
 from flask import Flask, render_template
 from flask import request
@@ -5,14 +7,26 @@ from parse import parse_mission
 from gevent.pywsgi import WSGIServer
 from flask_compress import Compress
 
-monkey.patch_all()
+host = "127.0.0.1"
+port = 8080
 
-app = Flask(__name__)
+if getattr(sys, "frozen", False):
+    template_folder = os.path.join(sys._MEIPASS, "templates")
+    static_folder = os.path.join(sys._MEIPASS, "static")
+    app = Flask(__name__, template_folder=template_folder, static_folder=static_folder)
+else:
+    app = Flask(__name__)
+current_path = os.path.dirname(os.path.abspath(__file__))
+print(current_path)
+
+monkey.patch_all()
 
 compress = Compress()
 compress.init_app(app)
 # Add support for static files
-app.static_folder = "static"
+
+template_folder = app.template_folder
+print(f"Template folder: {template_folder}")
 # app.config["APPLICATION_ROOT"] = "/"
 # app.config["SERVER_NAME"] = "localhost:5000"
 
@@ -34,9 +48,10 @@ def file_upload():
             return render_template("no_file.html"), 400
         # sqm_data = file.stream.read().decode("utf-8")
         sqm_data = parse_mission(file.stream.read().decode("utf-8"))
+        # pprint(sqm_data)
         # response = jsonify(sqm_data)
         # return response, 200
-        return render_template("file_upload.html", response=sqm_data)
+        return render_template("file_upload.html", mission_name=sqm_data[0], response=sqm_data[1])
     return "Incorrect", 400
 
 
@@ -63,6 +78,7 @@ def internal_server_error(error: Exception):
 
 
 if __name__ == "__main__":
-    # app.run(debug=True, host="0.0.0.0", port=8080)
-    http_server = WSGIServer(("0.0.0.0", 8080), app)
+    # app.run(debug=True, host=host, port=port)
+    print(f"Running on: http://{host}:{port}")
+    http_server = WSGIServer((host, port), app)
     http_server.serve_forever()

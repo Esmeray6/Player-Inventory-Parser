@@ -1,14 +1,25 @@
+import os
+import sys
 import armaclass
 import json
 
-with open("data_unorganized.json") as file:
+if getattr(sys, "frozen", False):
+    data_file = os.path.join(sys._MEIPASS, "data_unorganized.json")
+else:
+    data_file = "data_unorganized.json"
+
+with open(data_file) as file:
     item_data = json.load(file)
 
 
 def parse_mission(mission: str):
+    player_inventories = []
     inventory_data = {}
     sqm_data = armaclass.parse(mission)
+    # with open("entity.txt", "w") as file:
+    #     json.dump(sqm_data, file, indent=4, sort_keys=True)
     # return sqm_data
+    mission_name = sqm_data.get("sourceName", "").replace("_", " ")
     mission_data = sqm_data.get("Mission", {})
     entities = mission_data.get("Entities", {})
     for entity, entity_value in entities.items():
@@ -17,17 +28,24 @@ def parse_mission(mission: str):
             type(entity_value) is not dict
             or entity_value.get("dataType", "") != "Group"
         ):
-            continue
-        # print(f"Entity: {entity}")
-        for attribute, attribute_value in entity_value.get(
-            "CustomAttributes", {}
-        ).items():
-            # print(f"Attribute: {attribute}; Attribute value: {attribute_value}")
             if (
-                type(attribute_value) is not dict
-                or attribute_value.get("property", "") != "groupID"
+                type(entity_value) is dict
+                and entity_value.get("dataType", "") == "Layer"
             ):
+                print(f"Name of entity: {entity}")
+                for layer_entity, layer_entity_value in entity_value.get(
+                    "Entities", {}
+                ).items():
+                    if (
+                        type(layer_entity_value) is dict
+                        and layer_entity_value.get("dataType", "") == "Group"
+                    ):
+                        print(f"Name of layer entity: {layer_entity}")
+                        entity = layer_entity
+                        entity_value = layer_entity_value
+            else:
                 continue
+        # print(f"Entity: {entity}")
         for item_name, item_value in (entity_value.get("Entities", {})).items():
             if (
                 not type(item_value) is dict
@@ -163,6 +181,21 @@ def parse_mission(mission: str):
                     inventory["handgun"]["primaryMuzzleMag"][
                         "displayName"
                     ] = item_data.get(inventory["handgun"]["primaryMuzzleMag"]["name"])
+                if "muzzle" in inventory["handgun"]:
+                    inventory["handgun"]["muzzle"] = {
+                        "name": inventory["handgun"]["muzzle"],
+                        "displayName": item_data[inventory["handgun"]["muzzle"]],
+                    }
+                if "optics" in inventory["handgun"]:
+                    inventory["handgun"]["optics"] = {
+                        "name": inventory["handgun"]["optics"],
+                        "displayName": item_data[inventory["handgun"]["optics"]],
+                    }
+                if "underBarrel" in inventory["handgun"]:
+                    inventory["handgun"]["underBarrel"] = {
+                        "name": inventory["handgun"]["underBarrel"],
+                        "displayName": item_data[inventory["handgun"]["underBarrel"]],
+                    }
             if "secondaryWeapon" in inventory:
                 if "firemode" in inventory["secondaryWeapon"]:
                     inventory["secondaryWeapon"]["firemode"] = inventory[
@@ -180,6 +213,27 @@ def parse_mission(mission: str):
                     ] = item_data.get(
                         inventory["secondaryWeapon"]["primaryMuzzleMag"]["name"]
                     )
+                if "muzzle" in inventory["secondaryWeapon"]:
+                    inventory["secondaryWeapon"]["muzzle"] = {
+                        "name": inventory["secondaryWeapon"]["muzzle"],
+                        "displayName": item_data[
+                            inventory["secondaryWeapon"]["muzzle"]
+                        ],
+                    }
+                if "optics" in inventory["secondaryWeapon"]:
+                    inventory["secondaryWeapon"]["optics"] = {
+                        "name": inventory["secondaryWeapon"]["optics"],
+                        "displayName": item_data[
+                            inventory["secondaryWeapon"]["optics"]
+                        ],
+                    }
+                if "underBarrel" in inventory["secondaryWeapon"]:
+                    inventory["secondaryWeapon"]["underBarrel"] = {
+                        "name": inventory["secondaryWeapon"]["underBarrel"],
+                        "displayName": item_data[
+                            inventory["secondaryWeapon"]["underBarrel"]
+                        ],
+                    }
             if "binocular" in inventory:
                 inventory["binocular"]["displayName"] = item_data.get(
                     inventory["binocular"].get("name")
@@ -219,9 +273,15 @@ def parse_mission(mission: str):
                     "name": inventory["goggles"],
                     "displayName": item_data.get(inventory["goggles"]),
                 }
+            if "hmd" in inventory:
+                inventory["hmd"] = {
+                    "name": inventory["hmd"],
+                    "displayName": item_data.get(inventory["hmd"]),
+                }
 
-            inventory_data[description] = inventory
-    return inventory_data
+            inventory["description"] = description
+            player_inventories.append(inventory)
+    return [mission_name, player_inventories]
 
 
 # with open("output.sqm", "w") as output:
