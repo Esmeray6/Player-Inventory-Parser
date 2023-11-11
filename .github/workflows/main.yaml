@@ -1,27 +1,42 @@
 name: Package Application with Pyinstaller
 
 on:
-  push:
-    branches: [master]
-  pull_request:
-    branches: [master]
+  release:
+    types: [created]
+
+permissions:
+  contents: write
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-
+  create-release:
+    runs-on: windows-latest
     steps:
-      - run: mkdir -p dist/
-
-      - uses: actions/checkout@v3
-
-      - name: Package Application
-        uses: JackMcKew/pyinstaller-action-windows@python3-10-pyinstaller-5-3
+      - uses: actions/checkout@v4
+      - uses: taiki-e/create-gh-release-action@v1
         with:
-          path: .
-          spec: main.spec
+          # (optional) Path to changelog.
+          # changelog: CHANGELOG.md
+          # (required) GitHub token for creating GitHub Releases.
+          token: ${{ secrets.GITHUB_TOKEN }}
 
+  run-pyinstaller:
+    needs: create-release
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4.1.1
+      - uses: actions/setup-python@v4.7.1
+        with:
+          python-version: 3.11
+
+      - run: pip install -r requirements.txt pyinstaller
+      - run: pyinstaller main.spec
+      # Optionally verify that it works (provided that it does not need user interaction)
+      # - run: ./dist/your-code/your-code
+
+  upload-assets:
+    needs: create-release
+    runs-on: windows-latest
+    steps:
       - uses: actions/upload-artifact@v2
         with:
-          name: sqm-parser
-          path: ./dist
+          path: dist/*
