@@ -8,7 +8,6 @@ a = Analysis(
     datas=[("static/", "static"), ("templates/", "templates"), ("data_unorganized.json", ".")],
     hiddenimports=[],
     hookspath=[],
-    hooksconfig={},
     runtime_hooks=[],
     excludes=[],
     noarchive=False,
