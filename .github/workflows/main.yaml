@@ -27,4 +27,4 @@ jobs:
     steps:
       - uses: actions/upload-artifact@v2
         with:
-          path: dist/*
+          path: ./dist/*
