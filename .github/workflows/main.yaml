@@ -24,6 +24,5 @@ jobs:
         with:
           file: dist/main.exe
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          asset_name: "sqm parser"
           body: "This is an automatic release of SQM parser ${{ github.ref_name }}"
           make_latest: true
