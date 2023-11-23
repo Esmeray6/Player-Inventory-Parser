@@ -19,7 +19,7 @@ else:
 current_path = os.path.dirname(os.path.abspath(__file__))
 print(current_path)
 
-monkey.patch_all()
+# monkey.patch_all()
 
 compress = Compress()
 compress.init_app(app)
