@@ -3,7 +3,8 @@ import sys
 import armaclass
 import json
 
-from numpy import sort
+
+CARGO_NAMES = ("MagazineCargo", "ItemCargo")
 
 if getattr(sys, "frozen", False):
     data_file = os.path.join(sys._MEIPASS, "data_unorganized.json")
@@ -35,7 +36,7 @@ def parse_mission(mission: str):
                 type(entity_value) is dict
                 and entity_value.get("dataType", "") == "Layer"
             ):
-                print(f"Name of entity: {entity}")
+                # print(f"Name of entity: {entity}")
                 for layer_entity, layer_entity_value in entity_value.get(
                     "Entities", {}
                 ).items():
@@ -89,69 +90,77 @@ def parse_mission(mission: str):
 
         if "uniform" in inventory:
             uniform = inventory["uniform"]
+            items = []
+            for cargo in CARGO_NAMES:
+                if cargo in uniform:
+                    if "items" in uniform[cargo]:
+                        del uniform[cargo]["items"]
+                    for item, item_value in uniform[cargo].items():
+                        if type(item_value) is not dict:
+                            continue
+                        name = item_value.get("name")
+                        item_dict = {"name": name}
+                        if name is not None:
+                            display_name = item_data.get(name)
+                            item_dict["displayName"] = display_name
+                        count = item_value.get("count")
+                        if count is not None:
+                            item_dict["count"] = count
+                        items.append(item_dict)
             inventory["uniform"] = {
                 "name": uniform.get("typeName"),
-                "items": {
-                    **uniform.get("ItemCargo", {}),
-                    **uniform.get("MagazineCargo", {}),
-                },
+                "items": items,
                 "displayName": item_data.get(inventory["uniform"].get("typeName")),
             }
-            items = []
-            for item, item_value in inventory["uniform"]["items"].items():
-                # Make sure we're looking at the cargo, not any other items
-                if type(item_value) is not dict:
-                    continue
-                name = item_value.get("name")
-                if name is not None:
-                    display_name = item_data.get(name)
-                    inventory["uniform"]["items"][item]["displayName"] = display_name
-                items.append(item_value)
-            items.sort(key=lambda item: item.get("displayName", ""))
-            inventory["uniform"]["items"] = items
         if "vest" in inventory:
             vest = inventory["vest"]
+            items = []
+            for cargo in CARGO_NAMES:
+                if cargo in vest:
+                    if "items" in vest[cargo]:
+                        del vest[cargo]["items"]
+                    for item, item_value in vest[cargo].items():
+                        if type(item_value) is not dict:
+                            continue
+                        name = item_value.get("name")
+                        item_dict = {"name": name}
+                        if name is not None:
+                            display_name = item_data.get(name)
+                            item_dict["displayName"] = display_name
+                        count = item_value.get("count")
+                        if count is not None:
+                            item_dict["count"] = count
+                        items.append(item_dict)
+            items.sort(key=lambda item: item.get("displayName", ""))
             inventory["vest"] = {
                 "name": vest.get("typeName"),
-                "items": {
-                    **vest.get("ItemCargo", {}),
-                    **vest.get("MagazineCargo", {}),
-                },
+                "items": items,
                 "displayName": item_data.get(inventory["vest"].get("typeName")),
             }
-            items = []
-            for item, item_value in inventory["vest"]["items"].items():
-                if type(item_value) is not dict:
-                    continue
-                name = item_value.get("name")
-                if name is not None:
-                    display_name = item_data.get(name)
-                    inventory["vest"]["items"][item]["displayName"] = display_name
-                items.append(item_value)
-            items.sort(key=lambda item: item.get("displayName", ""))
-            inventory["vest"]["items"] = items
         if "backpack" in inventory:
             backpack = inventory["backpack"]
+            items = []
+            for cargo in CARGO_NAMES:
+                if cargo in backpack:
+                    if "items" in backpack[cargo]:
+                        del backpack[cargo]["items"]
+                    for item, item_value in backpack[cargo].items():
+                        if type(item_value) is not dict:
+                            continue
+                        name = item_value.get("name")
+                        item_dict = {"name": name}
+                        if name is not None:
+                            display_name = item_data.get(name)
+                            item_dict["displayName"] = display_name
+                        count = item_value.get("count")
+                        if count is not None:
+                            item_dict["count"] = count
+                        items.append(item_dict)
             inventory["backpack"] = {
                 "name": backpack.get("typeName"),
-                "items": {
-                    **backpack.get("ItemCargo", {}),
-                    **backpack.get("MagazineCargo", {}),
-                },
+                "items": items,
                 "displayName": item_data.get(inventory["backpack"].get("typeName")),
             }
-            items = []
-            for item, item_value in inventory["backpack"]["items"].items():
-                if type(item_value) is not dict:
-                    continue
-                name = item_value.get("name")
-                if name is not None:
-                    display_name = item_data.get(name)
-                    inventory["backpack"]["items"][item]["displayName"] = display_name
-                items.append(item_value)
-            items.sort(key=lambda item: item.get("displayName", ""))
-            inventory["backpack"]["items"] = items
-
         if "primaryWeapon" in inventory:
             if "firemode" in inventory["primaryWeapon"]:
                 inventory["primaryWeapon"]["firemode"] = inventory["primaryWeapon"][

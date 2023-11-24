@@ -51,7 +51,9 @@ def file_upload():
         # pprint(sqm_data)
         # response = jsonify(sqm_data)
         # return response, 200
-        return render_template("file_upload.html", mission_name=sqm_data[0], response=sqm_data[1])
+        return render_template(
+            "file_upload.html", mission_name=sqm_data[0], response=sqm_data[1]
+        )
     return "Incorrect", 400
 
 
