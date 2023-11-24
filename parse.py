@@ -6,7 +6,7 @@ import json
 
 CARGO_NAMES = ("MagazineCargo", "ItemCargo")
 
-if getattr(sys, "frozen", False):
+if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
     data_file = os.path.join(sys._MEIPASS, "data_unorganized.json")
 else:
     data_file = "data_unorganized.json"
