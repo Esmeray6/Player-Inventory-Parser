@@ -4,9 +4,9 @@ import armaclass
 import json
 
 
-CARGO_NAMES = ("MagazineCargo", "ItemCargo")
+CARGO_NAMES = ("MagazineCargo", "ItemCargo", "WeaponCargo")
 
-if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
+if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
     data_file = os.path.join(sys._MEIPASS, "data_unorganized.json")
 else:
     data_file = "data_unorganized.json"
@@ -100,6 +100,25 @@ def parse_mission(mission: str):
                             continue
                         name = item_value.get("name")
                         item_dict = {"name": name}
+                        if cargo == "WeaponCargo":
+                            if "primaryMuzzleMag" in item_value:
+                                primary_muzzle_mag = item_value["primaryMuzzleMag"]
+                                item_dict["primaryMuzzleMag"] = {
+                                    "name": primary_muzzle_mag.get("name"),
+                                    "displayName": item_data.get(
+                                        primary_muzzle_mag.get("name")
+                                    ),
+                                    "count": primary_muzzle_mag.get("count"),
+                                }
+                            if "secondaryMuzzleMag" in item_value:
+                                primary_muzzle_mag = item_value["secondaryMuzzleMag"]
+                                item_dict["secondaryMuzzleMag"] = {
+                                    "name": primary_muzzle_mag.get("name"),
+                                    "displayName": item_data.get(
+                                        primary_muzzle_mag.get("name")
+                                    ),
+                                    "count": primary_muzzle_mag.get("count"),
+                                }
                         if name is not None:
                             display_name = item_data.get(name)
                             item_dict["displayName"] = display_name
@@ -122,8 +141,29 @@ def parse_mission(mission: str):
                     for item, item_value in vest[cargo].items():
                         if type(item_value) is not dict:
                             continue
+                        if type(item_value) is not dict:
+                            continue
                         name = item_value.get("name")
                         item_dict = {"name": name}
+                        if cargo == "WeaponCargo":
+                            if "primaryMuzzleMag" in item_value:
+                                primary_muzzle_mag = item_value["primaryMuzzleMag"]
+                                item_dict["primaryMuzzleMag"] = {
+                                    "name": primary_muzzle_mag.get("name"),
+                                    "displayName": item_data.get(
+                                        primary_muzzle_mag.get("name")
+                                    ),
+                                    "count": primary_muzzle_mag.get("count"),
+                                }
+                            if "secondaryMuzzleMag" in item_value:
+                                primary_muzzle_mag = item_value["secondaryMuzzleMag"]
+                                item_dict["secondaryMuzzleMag"] = {
+                                    "name": primary_muzzle_mag.get("name"),
+                                    "displayName": item_data.get(
+                                        primary_muzzle_mag.get("name")
+                                    ),
+                                    "count": primary_muzzle_mag.get("count"),
+                                }
                         if name is not None:
                             display_name = item_data.get(name)
                             item_dict["displayName"] = display_name
@@ -149,6 +189,25 @@ def parse_mission(mission: str):
                             continue
                         name = item_value.get("name")
                         item_dict = {"name": name}
+                        if cargo == "WeaponCargo":
+                            if "primaryMuzzleMag" in item_value:
+                                primary_muzzle_mag = item_value["primaryMuzzleMag"]
+                                item_dict["primaryMuzzleMag"] = {
+                                    "name": primary_muzzle_mag.get("name"),
+                                    "displayName": item_data.get(
+                                        primary_muzzle_mag.get("name")
+                                    ),
+                                    "ammoLeft": primary_muzzle_mag.get("ammoLeft"),
+                                }
+                            if "secondaryMuzzleMag" in item_value:
+                                secondary_muzzle_mag = item_value["secondaryMuzzleMag"]
+                                item_dict["secondaryMuzzleMag"] = {
+                                    "name": secondary_muzzle_mag.get("name"),
+                                    "displayName": item_data.get(
+                                        secondary_muzzle_mag.get("name")
+                                    ),
+                                    "ammoLeft": secondary_muzzle_mag.get("ammoLeft"),
+                                }
                         if name is not None:
                             display_name = item_data.get(name)
                             item_dict["displayName"] = display_name
@@ -175,6 +234,12 @@ def parse_mission(mission: str):
                     "displayName"
                 ] = item_data.get(
                     inventory["primaryWeapon"]["primaryMuzzleMag"]["name"]
+                )
+            if "secondaryMuzzleMag" in inventory["primaryWeapon"]:
+                inventory["primaryWeapon"]["secondaryMuzzleMag"][
+                    "displayName"
+                ] = item_data.get(
+                    inventory["primaryWeapon"]["secondaryMuzzleMag"]["name"]
                 )
             if "flashlight" in inventory["primaryWeapon"]:
                 inventory["primaryWeapon"]["flashlight"] = {
@@ -209,6 +274,10 @@ def parse_mission(mission: str):
                 inventory["handgun"]["primaryMuzzleMag"]["displayName"] = item_data.get(
                     inventory["handgun"]["primaryMuzzleMag"]["name"]
                 )
+            if "secondaryMuzzleMag" in inventory["handgun"]:
+                inventory["handgun"]["secondaryMuzzleMag"][
+                    "displayName"
+                ] = item_data.get(inventory["handgun"]["secondaryMuzzleMag"]["name"])
             if "muzzle" in inventory["handgun"]:
                 inventory["handgun"]["muzzle"] = {
                     "name": inventory["handgun"]["muzzle"],
@@ -240,6 +309,12 @@ def parse_mission(mission: str):
                     "displayName"
                 ] = item_data.get(
                     inventory["secondaryWeapon"]["primaryMuzzleMag"]["name"]
+                )
+            if "secondaryMuzzleMag" in inventory["secondaryWeapon"]:
+                inventory["secondaryWeapon"]["secondaryMuzzleMag"][
+                    "displayName"
+                ] = item_data.get(
+                    inventory["secondaryWeapon"]["secondaryMuzzleMag"]["name"]
                 )
             if "muzzle" in inventory["secondaryWeapon"]:
                 inventory["secondaryWeapon"]["muzzle"] = {

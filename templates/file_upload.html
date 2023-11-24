@@ -105,6 +105,18 @@
                     {% for item in value[key]["items"] %}
                       {{ item.count }}x
                       {{ item.displayName }}
+                      {% if "primaryMuzzleMag" in item and "secondaryMuzzleMag" in item %}
+                        ({{ item.primaryMuzzleMag.ammoLeft }}x
+                        {{ item.primaryMuzzleMag.displayName }},
+                        {{ item.secondaryMuzzleMag.ammoLeft }}x
+                        {{ item.secondaryMuzzleMag.displayName }})
+                      {% elif "primaryMuzzleMag" in item %}
+                        ({{ item.primaryMuzzleMag.ammoLeft }}x
+                        {{ item.primaryMuzzleMag.displayName }})
+                      {% elif "secondaryMuzzleMag" in item %}
+                        ({{ item.secondaryMuzzleMag.ammoLeft }}x
+                        {{ item.secondaryMuzzleMag.displayName }})
+                      {% endif %}
                       <br />
                     {% endfor %}
                   </p>
@@ -121,6 +133,17 @@
                         {{
                           "round"
                           if value[key].primaryMuzzleMag.ammoLeft == 1 else
+                          "rounds"
+                        }}
+                      </p>
+                    {% endif %}
+                    {% if attachment == "secondaryMuzzleMag" %}
+                      <p style="margin-bottom: 0">
+                        {{ value[key].secondaryMuzzleMag.displayName }} —
+                        {{ value[key].secondaryMuzzleMag.ammoLeft }}
+                        {{
+                          "round"
+                          if value[key].secondaryMuzzleMag.ammoLeft == 1 else
                           "rounds"
                         }}
                       </p>
