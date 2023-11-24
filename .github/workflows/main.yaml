@@ -20,7 +20,7 @@ jobs:
       - run: pyinstaller .spec -y
       # Optionally verify that it works (provided that it does not need user interaction)
       # - run: ./dist/your-code/your-code
-      - run: zip SQM_Parser.zip ./* -r
+      - run: Compress-Archive -Path dist/* -Destination SQM_Parser.zip
       - uses: svenstaro/upload-release-action@2.7.0
         with:
           file: "SQM_Parser.zip"
