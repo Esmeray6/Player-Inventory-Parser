@@ -9,6 +9,8 @@ a = Analysis(
         ("static/", "static"),
         ("templates/", "templates"),
         ("./data_unorganized.json", "."),
+        ("./MissionDerap.bat", "."),
+        ("./CfgConvert.exe", "."),
     ],
     hiddenimports=[],
     hookspath=[],

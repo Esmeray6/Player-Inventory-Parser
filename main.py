@@ -1,4 +1,5 @@
 import os
+import subprocess
 import sys
 from gevent import monkey
 from flask import Flask, render_template
@@ -47,13 +48,28 @@ def file_upload():
         if file is None:
             return render_template("no_file.html"), 400
         # sqm_data = file.stream.read().decode("utf-8")
-        sqm_data = parse_mission(file.stream.read().decode("utf-8"))
-        # pprint(sqm_data)
-        # response = jsonify(sqm_data)
-        # return response, 200
-        return render_template(
-            "file_upload.html", mission_name=sqm_data[0], response=sqm_data[1]
-        )
+        # Save the file to the current working directory
+        file.filename = "mission.sqm"
+        file_path = os.path.join(os.getcwd(), "_internal", file.filename)
+        file.save(file_path)
+        file.close()
+
+        internal_dir = os.path.join(os.getcwd(), "_internal")
+
+        # Define the path to the batch file inside the "_internal" folder
+        batch_file_path = os.path.join(internal_dir, "MissionDerap.bat")
+
+        # Run the batch file using subprocess
+        subprocess.run([batch_file_path, file_path], shell=True)
+
+        with open(os.path.join(internal_dir, "mission.sqm")) as file:
+            sqm_data = parse_mission(file.read())
+            # pprint(sqm_data)
+            # response = jsonify(sqm_data)
+            # return response, 200
+            return render_template(
+                "file_upload.html", mission_name=sqm_data[0], response=sqm_data[1]
+            )
     return "Incorrect", 400
 
 
