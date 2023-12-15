@@ -8,6 +8,8 @@ from parse import parse_mission
 from gevent.pywsgi import WSGIServer
 from flask_compress import Compress
 
+# 0 for DEBUG, 1 for PRODUCTION
+MODE = 1
 host = "127.0.0.1"
 port = 8080
 
@@ -20,7 +22,8 @@ else:
 current_path = os.path.dirname(os.path.abspath(__file__))
 print(current_path)
 
-# monkey.patch_all()
+if MODE == 1:
+    monkey.patch_all()
 
 compress = Compress()
 compress.init_app(app)
@@ -49,12 +52,14 @@ def file_upload():
             return render_template("no_file.html"), 400
         # sqm_data = file.stream.read().decode("utf-8")
         # Save the file to the current working directory
+        internal_dir = os.path.join(os.getcwd(), "_internal")
+        if not os.path.isdir(internal_dir):
+            os.mkdir(internal_dir)
+
         file.filename = "mission.sqm"
-        file_path = os.path.join(os.getcwd(), "_internal", file.filename)
+        file_path = os.path.join(internal_dir, file.filename)
         file.save(file_path)
         file.close()
-
-        internal_dir = os.path.join(os.getcwd(), "_internal")
 
         # Define the path to the batch file inside the "_internal" folder
         batch_file_path = os.path.join(internal_dir, "MissionDerap.bat")
@@ -96,7 +101,9 @@ def internal_server_error(error: Exception):
 
 
 if __name__ == "__main__":
-    # app.run(debug=True, host=host, port=port)
-    print(f"Running on: http://{host}:{port}")
-    http_server = WSGIServer((host, port), app)
-    http_server.serve_forever()
+    if MODE == 0:
+        app.run(debug=True, host=host, port=port)
+    elif MODE == 1:
+        print(f"Running on: http://{host}:{port}")
+        http_server = WSGIServer((host, port), app)
+        http_server.serve_forever()

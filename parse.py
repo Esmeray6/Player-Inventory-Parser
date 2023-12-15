@@ -126,7 +126,7 @@ def parse_mission(mission: str):
                         if count is not None:
                             item_dict["count"] = count
                         items.append(item_dict)
-            items.sort(key=lambda item: item.get("displayName", ""))
+            items.sort(key=lambda item: str(item.get("displayName", item.get("name", ""))))
             inventory["uniform"] = {
                 "name": uniform.get("typeName"),
                 "items": items,
@@ -172,7 +172,7 @@ def parse_mission(mission: str):
                         if count is not None:
                             item_dict["count"] = count
                         items.append(item_dict)
-            items.sort(key=lambda item: item.get("displayName", ""))
+            items.sort(key=lambda item: str(item.get("displayName", item.get("name", ""))))
             inventory["vest"] = {
                 "name": vest.get("typeName"),
                 "items": items,
@@ -216,7 +216,8 @@ def parse_mission(mission: str):
                         if count is not None:
                             item_dict["count"] = count
                         items.append(item_dict)
-            items.sort(key=lambda item: item.get("displayName", ""))
+            print(f"Items: {items}")
+            items.sort(key=lambda item: str(item.get("displayName", item.get("name", ""))))
             inventory["backpack"] = {
                 "name": backpack.get("typeName"),
                 "items": items,
