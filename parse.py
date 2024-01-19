@@ -126,7 +126,9 @@ def parse_mission(mission: str):
                         if count is not None:
                             item_dict["count"] = count
                         items.append(item_dict)
-            items.sort(key=lambda item: str(item.get("displayName", item.get("name", ""))))
+            items.sort(
+                key=lambda item: str(item.get("displayName", item.get("name", "")))
+            )
             inventory["uniform"] = {
                 "name": uniform.get("typeName"),
                 "items": items,
@@ -172,7 +174,9 @@ def parse_mission(mission: str):
                         if count is not None:
                             item_dict["count"] = count
                         items.append(item_dict)
-            items.sort(key=lambda item: str(item.get("displayName", item.get("name", ""))))
+            items.sort(
+                key=lambda item: str(item.get("displayName", item.get("name", "")))
+            )
             inventory["vest"] = {
                 "name": vest.get("typeName"),
                 "items": items,
@@ -217,7 +221,9 @@ def parse_mission(mission: str):
                             item_dict["count"] = count
                         items.append(item_dict)
             print(f"Items: {items}")
-            items.sort(key=lambda item: str(item.get("displayName", item.get("name", ""))))
+            items.sort(
+                key=lambda item: str(item.get("displayName", item.get("name", "")))
+            )
             inventory["backpack"] = {
                 "name": backpack.get("typeName"),
                 "items": items,
@@ -247,22 +253,26 @@ def parse_mission(mission: str):
             if "flashlight" in inventory["primaryWeapon"]:
                 inventory["primaryWeapon"]["flashlight"] = {
                     "name": inventory["primaryWeapon"]["flashlight"],
-                    "displayName": item_data[inventory["primaryWeapon"]["flashlight"]],
+                    "displayName": item_data.get(
+                        inventory["primaryWeapon"]["flashlight"]
+                    ),
                 }
             if "muzzle" in inventory["primaryWeapon"]:
                 inventory["primaryWeapon"]["muzzle"] = {
                     "name": inventory["primaryWeapon"]["muzzle"],
-                    "displayName": item_data[inventory["primaryWeapon"]["muzzle"]],
+                    "displayName": item_data.get(inventory["primaryWeapon"]["muzzle"]),
                 }
             if "optics" in inventory["primaryWeapon"]:
                 inventory["primaryWeapon"]["optics"] = {
                     "name": inventory["primaryWeapon"]["optics"],
-                    "displayName": item_data[inventory["primaryWeapon"]["optics"]],
+                    "displayName": item_data.get(inventory["primaryWeapon"]["optics"]),
                 }
             if "underBarrel" in inventory["primaryWeapon"]:
                 inventory["primaryWeapon"]["underBarrel"] = {
                     "name": inventory["primaryWeapon"]["underBarrel"],
-                    "displayName": item_data[inventory["primaryWeapon"]["underBarrel"]],
+                    "displayName": item_data.get(
+                        inventory["primaryWeapon"]["underBarrel"]
+                    ),
                 }
         if "handgun" in inventory:
             if "firemode" in inventory["handgun"]:
@@ -281,20 +291,25 @@ def parse_mission(mission: str):
                 inventory["handgun"]["secondaryMuzzleMag"][
                     "displayName"
                 ] = item_data.get(inventory["handgun"]["secondaryMuzzleMag"]["name"])
+            if "flashlight" in inventory["handgun"]:
+                inventory["handgun"]["flashlight"] = {
+                    "name": inventory["handgun"]["flashlight"],
+                    "displayName": item_data.get(inventory["handgun"]["flashlight"]),
+                }
             if "muzzle" in inventory["handgun"]:
                 inventory["handgun"]["muzzle"] = {
                     "name": inventory["handgun"]["muzzle"],
-                    "displayName": item_data[inventory["handgun"]["muzzle"]],
+                    "displayName": item_data.get(inventory["handgun"]["muzzle"]),
                 }
             if "optics" in inventory["handgun"]:
                 inventory["handgun"]["optics"] = {
                     "name": inventory["handgun"]["optics"],
-                    "displayName": item_data[inventory["handgun"]["optics"]],
+                    "displayName": item_data.get(inventory["handgun"]["optics"]),
                 }
             if "underBarrel" in inventory["handgun"]:
                 inventory["handgun"]["underBarrel"] = {
                     "name": inventory["handgun"]["underBarrel"],
-                    "displayName": item_data[inventory["handgun"]["underBarrel"]],
+                    "displayName": item_data.get(inventory["handgun"]["underBarrel"]),
                 }
         if "secondaryWeapon" in inventory:
             if "firemode" in inventory["secondaryWeapon"]:
@@ -322,19 +337,23 @@ def parse_mission(mission: str):
             if "muzzle" in inventory["secondaryWeapon"]:
                 inventory["secondaryWeapon"]["muzzle"] = {
                     "name": inventory["secondaryWeapon"]["muzzle"],
-                    "displayName": item_data[inventory["secondaryWeapon"]["muzzle"]],
+                    "displayName": item_data.get(
+                        inventory["secondaryWeapon"]["muzzle"]
+                    ),
                 }
             if "optics" in inventory["secondaryWeapon"]:
                 inventory["secondaryWeapon"]["optics"] = {
                     "name": inventory["secondaryWeapon"]["optics"],
-                    "displayName": item_data[inventory["secondaryWeapon"]["optics"]],
+                    "displayName": item_data.get(
+                        inventory["secondaryWeapon"]["optics"]
+                    ),
                 }
             if "underBarrel" in inventory["secondaryWeapon"]:
                 inventory["secondaryWeapon"]["underBarrel"] = {
                     "name": inventory["secondaryWeapon"]["underBarrel"],
-                    "displayName": item_data[
+                    "displayName": item_data.get(
                         inventory["secondaryWeapon"]["underBarrel"]
-                    ],
+                    ),
                 }
         if "binocular" in inventory:
             inventory["binocular"]["displayName"] = item_data.get(
