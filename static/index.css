@@ -8,7 +8,7 @@ body {
     margin: 0;
 }
 
-#fileToUpload {
+input[type=file] {
     margin: 0 0 20px 0;
 }
 
