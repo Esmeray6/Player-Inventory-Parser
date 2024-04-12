@@ -165,3 +165,4 @@ package.json
 *lock.json
 **/*.sqm*
 _internal/*
+.vscode/*
