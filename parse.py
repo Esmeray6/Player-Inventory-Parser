@@ -1,4 +1,5 @@
 import os
+import re
 import sys
 import armaclass
 import json
@@ -7,7 +8,7 @@ import json
 CARGO_NAMES = ("MagazineCargo", "ItemCargo", "WeaponCargo")
 
 if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
-    data_file = os.path.join(sys._MEIPASS, "data_unorganized.json")
+    data_file = os.path.join(sys._MEIPASS, "data_unorganized.json")  # type: ignore
 else:
     data_file = "data_unorganized.json"
 
@@ -15,17 +16,59 @@ with open(data_file) as file:
     item_data = json.load(file)
 
 
-def parse_mission(mission: str):
+def parse_mission(sqm_path: str, equipment_path: str):
+    with open(sqm_path) as file:
+        sqm_data = armaclass.parse(file.read())
     player_inventories = []
     players = []
     inventory_data = {}
-    sqm_data = armaclass.parse(mission)
     # with open("entity.txt", "w") as file:
     #     json.dump(sqm_data, file, indent=4, sort_keys=True)
     # return sqm_data
     mission_name = sqm_data.get("sourceName", "").replace("_", " ")
     mission_data = sqm_data.get("Mission", {})
     entities = mission_data.get("Entities", {})
+
+    with open(equipment_path) as equipment_file:
+        equipment_code = equipment_file.read()
+    # Regular expression pattern to extract variable assignments
+    pattern = r"private\s+(\w+)\s*=\s*(.*?);"
+
+    # Find all variable assignments using regular expressions
+    matches = re.findall(pattern, equipment_code, re.DOTALL)
+
+    # Dictionary to store parsed variable assignments
+    variables = {}
+
+    # Iterate over matches and extract variable names and values
+    for match in matches:
+        variable_name = match[0]
+        variable_value = match[1]
+        # Remove comments from variable values
+        variable_value = re.sub(
+            r"\/\*.*?\*\/|\/\/.*$", "", variable_value, flags=re.MULTILINE
+        )
+        # Parse variable value as Python object
+        parsed_value = None
+        if variable_value.startswith("[") and variable_value.endswith("]"):
+            # Handle array values
+            array_items = variable_value[1:-1].split("],")
+            parsed_value = [
+                list(
+                    map(
+                        lambda x: x.strip().strip('"'),
+                        item.strip().strip("[]").strip("\"'").split(","),
+                    )
+                )
+                for item in array_items
+            ]
+            if len(parsed_value) == 1:
+                parsed_value = parsed_value[0]  # Unwrap single element arrays
+        else:
+            # Handle other types of values
+            parsed_value = variable_value.strip().strip("\"'")
+        variables[variable_name] = parsed_value
+
     for entity, entity_value in entities.items():
         # print(f"Entity: {entity}; Entity value: {entity_value}")
         if (
@@ -126,6 +169,18 @@ def parse_mission(mission: str):
                         if count is not None:
                             item_dict["count"] = count
                         items.append(item_dict)
+
+            # Print parsed variables
+            if variables["_medicalAndMiscForEveryone"]:
+                for item_name, item_count in variables["_uniformItems"]:
+                    if int(item_count) > 0:
+                        item_dict = {
+                            "name": item_name,
+                            "displayName": item_data.get(item_name),
+                            "count": item_count,
+                        }
+                        items.append(item_dict)
+
             items.sort(
                 key=lambda item: str(item.get("displayName", item.get("name", "")))
             )
@@ -239,16 +294,16 @@ def parse_mission(mission: str):
                 inventory["primaryWeapon"].get("name")
             )
             if "primaryMuzzleMag" in inventory["primaryWeapon"]:
-                inventory["primaryWeapon"]["primaryMuzzleMag"][
-                    "displayName"
-                ] = item_data.get(
-                    inventory["primaryWeapon"]["primaryMuzzleMag"]["name"]
+                inventory["primaryWeapon"]["primaryMuzzleMag"]["displayName"] = (
+                    item_data.get(
+                        inventory["primaryWeapon"]["primaryMuzzleMag"]["name"]
+                    )
                 )
             if "secondaryMuzzleMag" in inventory["primaryWeapon"]:
-                inventory["primaryWeapon"]["secondaryMuzzleMag"][
-                    "displayName"
-                ] = item_data.get(
-                    inventory["primaryWeapon"]["secondaryMuzzleMag"]["name"]
+                inventory["primaryWeapon"]["secondaryMuzzleMag"]["displayName"] = (
+                    item_data.get(
+                        inventory["primaryWeapon"]["secondaryMuzzleMag"]["name"]
+                    )
                 )
             if "flashlight" in inventory["primaryWeapon"]:
                 inventory["primaryWeapon"]["flashlight"] = {
@@ -288,9 +343,9 @@ def parse_mission(mission: str):
                     inventory["handgun"]["primaryMuzzleMag"]["name"]
                 )
             if "secondaryMuzzleMag" in inventory["handgun"]:
-                inventory["handgun"]["secondaryMuzzleMag"][
-                    "displayName"
-                ] = item_data.get(inventory["handgun"]["secondaryMuzzleMag"]["name"])
+                inventory["handgun"]["secondaryMuzzleMag"]["displayName"] = (
+                    item_data.get(inventory["handgun"]["secondaryMuzzleMag"]["name"])
+                )
             if "flashlight" in inventory["handgun"]:
                 inventory["handgun"]["flashlight"] = {
                     "name": inventory["handgun"]["flashlight"],
@@ -323,21 +378,23 @@ def parse_mission(mission: str):
                 inventory["secondaryWeapon"].get("name")
             )
             if "primaryMuzzleMag" in inventory["secondaryWeapon"]:
-                inventory["secondaryWeapon"]["primaryMuzzleMag"][
-                    "displayName"
-                ] = item_data.get(
-                    inventory["secondaryWeapon"]["primaryMuzzleMag"]["name"]
+                inventory["secondaryWeapon"]["primaryMuzzleMag"]["displayName"] = (
+                    item_data.get(
+                        inventory["secondaryWeapon"]["primaryMuzzleMag"]["name"]
+                    )
                 )
             if "secondaryMuzzleMag" in inventory["secondaryWeapon"]:
-                inventory["secondaryWeapon"]["secondaryMuzzleMag"][
-                    "displayName"
-                ] = item_data.get(
-                    inventory["secondaryWeapon"]["secondaryMuzzleMag"]["name"]
+                inventory["secondaryWeapon"]["secondaryMuzzleMag"]["displayName"] = (
+                    item_data.get(
+                        inventory["secondaryWeapon"]["secondaryMuzzleMag"]["name"]
+                    )
                 )
             if "flashlight" in inventory["secondaryWeapon"]:
                 inventory["secondaryWeapon"]["flashlight"] = {
                     "name": inventory["secondaryWeapon"]["flashlight"],
-                    "displayName": item_data.get(inventory["secondaryWeapon"]["flashlight"]),
+                    "displayName": item_data.get(
+                        inventory["secondaryWeapon"]["flashlight"]
+                    ),
                 }
             if "muzzle" in inventory["secondaryWeapon"]:
                 inventory["secondaryWeapon"]["muzzle"] = {

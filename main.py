@@ -1,4 +1,5 @@
 import os
+import shutil
 import subprocess
 import sys
 from gevent import monkey
@@ -9,13 +10,13 @@ from gevent.pywsgi import WSGIServer
 from flask_compress import Compress
 
 # 0 for DEBUG, 1 for PRODUCTION
-MODE = 1
+MODE = 0
 host = "127.0.0.1"
 port = 8080
 
 if getattr(sys, "frozen", False):
-    template_folder = os.path.join(sys._MEIPASS, "templates")
-    static_folder = os.path.join(sys._MEIPASS, "static")
+    template_folder = os.path.join(sys._MEIPASS, "templates")  # type: ignore
+    static_folder = os.path.join(sys._MEIPASS, "static")  # type: ignore
     app = Flask(__name__, template_folder=template_folder, static_folder=static_folder)
 else:
     app = Flask(__name__)
@@ -47,34 +48,43 @@ def hello_world():
 @app.route("/fileUpload", methods=["POST"])
 def file_upload():
     if request.method == "POST":
-        file = request.files.get("fileToUpload")
-        if file is None:
-            return render_template("no_file.html"), 400
+        source_file = request.files.get("missionFile")
+        if source_file is None:
+            return render_template("error.html", error_string="Mission file not found"), 400
         # sqm_data = file.stream.read().decode("utf-8")
         # Save the file to the current working directory
         internal_dir = os.path.join(os.getcwd(), "_internal")
         if not os.path.isdir(internal_dir):
             os.mkdir(internal_dir)
 
-        file.filename = "mission.sqm"
-        file_path = os.path.join(internal_dir, file.filename)
-        file.save(file_path)
-        file.close()
+        destination_dir = os.path.join(internal_dir, "mission.sqm")
+        source_file.save(destination_dir)
+        source_file.close()
+        equipment_file = request.files.get("equipmentFile")
+        if equipment_file is None:
+            return (
+                render_template("error.html", error_string="Equipment file not found"),
+                400,
+            )
+        equipment_path = os.path.join(internal_dir, "AET_equipment.sqf")
+        equipment_file.save(equipment_path)
+        equipment_file.close()
+
+        # os.makedirs(destination_dir, exist_ok=True)
 
         # Define the path to the batch file inside the "_internal" folder
         batch_file_path = os.path.join(internal_dir, "MissionDerap.bat")
 
         # Run the batch file using subprocess
-        subprocess.run([batch_file_path, file_path], shell=True)
+        subprocess.run([batch_file_path, destination_dir], shell=True)
 
-        with open(os.path.join(internal_dir, "mission.sqm")) as file:
-            sqm_data = parse_mission(file.read())
-            # pprint(sqm_data)
-            # response = jsonify(sqm_data)
-            # return response, 200
-            return render_template(
-                "file_upload.html", mission_name=sqm_data[0], response=sqm_data[1]
-            )
+        sqm_data = parse_mission(destination_dir, equipment_path)
+        # pprint(sqm_data)
+        # response = jsonify(sqm_data)
+        # return response, 200
+        return render_template(
+            "file_upload.html", mission_name=sqm_data[0], response=sqm_data[1]
+        )
     return "Incorrect", 400
 
 
