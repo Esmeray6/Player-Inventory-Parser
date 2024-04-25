@@ -10,7 +10,7 @@ from gevent.pywsgi import WSGIServer
 from flask_compress import Compress
 
 # 0 for DEBUG, 1 for PRODUCTION
-MODE = 0
+MODE = 1
 host = "127.0.0.1"
 port = 8080
 
@@ -50,7 +50,10 @@ def file_upload():
     if request.method == "POST":
         source_file = request.files.get("missionFile")
         if source_file is None:
-            return render_template("error.html", error_string="Mission file not found"), 400
+            return (
+                render_template("error.html", error_string="Mission file not found"),
+                400,
+            )
         # sqm_data = file.stream.read().decode("utf-8")
         # Save the file to the current working directory
         internal_dir = os.path.join(os.getcwd(), "_internal")

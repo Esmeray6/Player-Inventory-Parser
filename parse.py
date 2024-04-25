@@ -171,7 +171,7 @@ def parse_mission(sqm_path: str, equipment_path: str):
                         items.append(item_dict)
 
             # Print parsed variables
-            if variables["_medicalAndMiscForEveryone"]:
+            if variables["_medicalAndMiscForEveryone"] == "true":
                 for item_name, item_count in variables["_uniformItems"]:
                     if int(item_count) > 0:
                         item_dict = {
