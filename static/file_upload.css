@@ -15,3 +15,24 @@ body {
 h6 {
   margin-top: 0.2rem;
 }
+
+/* Dark theme */  
+@media (prefers-color-scheme: dark) {
+  body {
+    background-color: #121212;
+  }
+
+  .card {
+    background-color: #424242;
+    border-color: #f5f5f5;
+  }
+
+  .card-title, .card-subtitle {
+    color: #f5f5f5;
+  }
+
+  .list-group-item {
+    background-color: #121212;
+    color: #f5f5f5;  
+  }
+}

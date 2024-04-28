@@ -15,3 +15,22 @@ input[type=file] {
 #submitButton {
     margin: 0 0 0 20px;
 }
+
+/* Dark theme */
+@media (prefers-color-scheme: dark) {
+  body {
+    background-color: #121212;
+    color: #f5f5f5;
+  }
+
+  input[type=file] {
+    background-color: #424242; 
+    color: #f5f5f5;
+  }
+
+  #submitButton {
+    background-color: #424242;
+    color: #f5f5f5;
+    border-color: #f5f5f5;
+  }
+}
