@@ -6,6 +6,16 @@ import json
 
 
 CARGO_NAMES = ("MagazineCargo", "ItemCargo", "WeaponCargo")
+PROGRAMMER_REQUIRED_RADIOS = ["TFAR_anprc154", "TFAR_pnr1000a", "TFAR_rf7800str"]
+# TFAR_COMPATIBLE_RADIOS = [
+#     "gm_radio_r126",
+#     "gm_radio_sem52a",
+#     "vn_o_item_radio_m252",
+#     "vn_b_item_radio_urc10",
+#     "TFAR_anprc148jem",
+#     "TFAR_anprc152",
+#     "TFAR_fadak",
+# ] + PROGRAMMER_REQUIRED_RADIOS
 
 if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
     data_file = os.path.join(sys._MEIPASS, "data_unorganized.json")  # type: ignore
@@ -131,7 +141,34 @@ def parse_mission(sqm_path: str, equipment_path: str):
         description = attributes.get("description", {})
         inventory = attributes.get("Inventory", {})
 
-        if "uniform" in inventory:
+        inventory = {
+            "primaryWeapon": inventory.get(
+                "primaryWeapon", {"name": "None", "displayName": "None"}
+            ),
+            "secondaryWeapon": inventory.get(
+                "secondaryweapon", {"name": "None", "displayName": "None"}
+            ),
+            "handgun": inventory.get(
+                "handgun", {"name": "None", "displayName": "None"}
+            ),
+            "uniform": inventory.get(
+                "uniform", {"name": "None", "displayName": "None"}
+            ),
+            "vest": inventory.get("vest", {"name": "None", "displayName": "None"}),
+            "backpack": inventory.get(
+                "backpack", {"name": "None", "displayName": "None"}
+            ),
+            "map": inventory.get("map", "None"),
+            "compass": inventory.get("compass", "None"),
+            "watch": inventory.get("watch", "None"),
+            "goggles": inventory.get("goggles", "None"),
+            "radio": inventory.get("radio", "None"),
+            "headgear": inventory.get("headgear", "None"),
+            "binocular": inventory.get("binocular", {"name": "None"}),
+            "gps": inventory.get("gps", "None"),
+        }
+
+        if inventory.get("uniform"):
             uniform = inventory["uniform"]
             items = []
             for cargo in CARGO_NAMES:
@@ -189,7 +226,7 @@ def parse_mission(sqm_path: str, equipment_path: str):
                 "items": items,
                 "displayName": item_data.get(inventory["uniform"].get("typeName")),
             }
-        if "vest" in inventory:
+        if inventory.get("vest"):
             vest = inventory["vest"]
             items = []
             for cargo in CARGO_NAMES:
@@ -237,7 +274,7 @@ def parse_mission(sqm_path: str, equipment_path: str):
                 "items": items,
                 "displayName": item_data.get(inventory["vest"].get("typeName")),
             }
-        if "backpack" in inventory:
+        if inventory.get("backpack"):
             backpack = inventory["backpack"]
             items = []
             for cargo in CARGO_NAMES:
@@ -284,7 +321,7 @@ def parse_mission(sqm_path: str, equipment_path: str):
                 "items": items,
                 "displayName": item_data.get(inventory["backpack"].get("typeName")),
             }
-        if "primaryWeapon" in inventory:
+        if inventory.get("primaryWeapon"):
             if "firemode" in inventory["primaryWeapon"]:
                 inventory["primaryWeapon"]["firemode"] = inventory["primaryWeapon"][
                     "firemode"
@@ -329,7 +366,7 @@ def parse_mission(sqm_path: str, equipment_path: str):
                         inventory["primaryWeapon"]["underBarrel"]
                     ),
                 }
-        if "handgun" in inventory:
+        if inventory.get("handgun", {}).get("name", "") != "":
             if "firemode" in inventory["handgun"]:
                 inventory["handgun"]["firemode"] = inventory["handgun"][
                     "firemode"
@@ -366,7 +403,7 @@ def parse_mission(sqm_path: str, equipment_path: str):
                     "name": inventory["handgun"]["underBarrel"],
                     "displayName": item_data.get(inventory["handgun"]["underBarrel"]),
                 }
-        if "secondaryWeapon" in inventory:
+        if inventory.get("secondaryWeapon"):
             if "firemode" in inventory["secondaryWeapon"]:
                 inventory["secondaryWeapon"]["firemode"] = inventory["secondaryWeapon"][
                     "firemode"
@@ -417,46 +454,93 @@ def parse_mission(sqm_path: str, equipment_path: str):
                         inventory["secondaryWeapon"]["underBarrel"]
                     ),
                 }
-        if "binocular" in inventory:
-            inventory["binocular"]["displayName"] = item_data.get(
-                inventory["binocular"].get("name")
-            )
-        if "compass" in inventory:
-            inventory["compass"] = {
-                "name": inventory["compass"],
-                "displayName": item_data.get(inventory["compass"]),
-            }
-        if "gps" in inventory:
-            inventory["gps"] = {
-                "name": inventory["gps"],
-                "displayName": item_data.get(inventory["gps"]),
-            }
-        if "map" in inventory:
-            inventory["map"] = {
-                "name": inventory["map"],
-                "displayName": item_data.get(inventory["map"]),
-            }
-        if "radio" in inventory:
-            inventory["radio"] = {
-                "name": inventory["radio"],
-                "displayName": item_data.get(inventory["radio"]),
-            }
-        if "watch" in inventory:
-            inventory["watch"] = {
-                "name": inventory["watch"],
-                "displayName": item_data.get(inventory["watch"]),
-            }
-        if "headgear" in inventory:
+        if inventory.get("headgear", "None") != "None":
             inventory["headgear"] = {
                 "name": inventory["headgear"],
                 "displayName": item_data.get(inventory["headgear"]),
             }
-        if "goggles" in inventory:
+        if inventory.get("binocular", {"name": "None"}).get("name", "None") != "None":
+            inventory["binocular"]["displayName"] = item_data.get(
+                inventory["binocular"].get("name")
+            )
+        else:
+            if variables["_binocularsForEveryone"][1]:
+                inventory["binocular"] = {
+                    "name": variables["_binocularsForEveryone"][0],
+                    "displayName": item_data.get(
+                        variables["_binocularsForEveryone"][0]
+                    ),
+                }
+        if inventory.get("compass", "None") != "None":
+            inventory["compass"] = {
+                "name": inventory["compass"],
+                "displayName": item_data.get(inventory["compass"]),
+            }
+        else:
+            if variables["_compassesForEveryone"][1]:
+                inventory["compass"] = {
+                    "name": variables["_compassesForEveryone"][0],
+                    "displayName": item_data.get(variables["_compassesForEveryone"][0]),
+                }
+        if inventory.get("gps", "None") != "None":
+            inventory["gps"] = {
+                "name": inventory["gps"],
+                "displayName": item_data.get(inventory["gps"]),
+            }
+        else:
+            if variables["_GPSsForEveryone"][1]:
+                inventory["gps"] = {
+                    "name": variables["_GPSsForEveryone"][0],
+                    "displayName": item_data.get(variables["_GPSsForEveryone"][0]),
+                }
+        if inventory.get("map", "None") != "None":
+            inventory["map"] = {
+                "name": inventory["map"],
+                "displayName": item_data.get(inventory["map"]),
+            }
+        else:
+            if variables["_mapsForEveryone"][1]:
+                inventory["map"] = {
+                    "name": variables["_mapsForEveryone"][0],
+                    "displayName": item_data.get(variables["_mapsForEveryone"][0]),
+                }
+        if inventory.get("radio", "None") != "None":
+            inventory["radio"] = {
+                "name": inventory["radio"],
+                "displayName": item_data.get(inventory["radio"]),
+            }
+        else:
+            if (
+                variables["_radiosForEveryone"][1]
+                or variables["_radioProgrammersForEveryone"]
+            ):
+                inventory["radio"] = {
+                    "name": variables["_radiosForEveryone"][0],
+                    "displayName": item_data.get(variables["_radiosForEveryone"][0]),
+                }
+
+        if inventory.get("radio", {}).get("name", "None") in PROGRAMMER_REQUIRED_RADIOS:
+            inventory["watch"] = "TFAR_microdagr"
+
+        if inventory.get("watch", "None") != "None":
+            inventory["watch"] = {
+                "name": inventory["watch"],
+                "displayName": item_data.get(inventory["watch"]),
+            }
+        else:
+            if variables["_handWatchesForEveryone"][1]:
+                inventory["watch"] = {
+                    "name": variables["_handWatchesForEveryone"][0],
+                    "displayName": item_data.get(
+                        variables["_handWatchesForEveryone"][0]
+                    ),
+                }
+        if inventory.get("goggles", "None") != "None":
             inventory["goggles"] = {
                 "name": inventory["goggles"],
                 "displayName": item_data.get(inventory["goggles"]),
             }
-        if "hmd" in inventory:
+        if inventory.get("hmd", "None") != "None":
             inventory["hmd"] = {
                 "name": inventory["hmd"],
                 "displayName": item_data.get(inventory["hmd"]),
