@@ -77,6 +77,13 @@ def parse_mission(sqm_path: str, equipment_path: str):
         else:
             # Handle other types of values
             parsed_value = variable_value.strip().strip("\"'")
+
+        if parsed_value == "true":
+            parsed_value = True
+        elif parsed_value == "false":
+            parsed_value = False
+        elif type(parsed_value) is list and len(parsed_value) == 2:
+            parsed_value[1] = True if parsed_value[1] == "true" else False
         variables[variable_name] = parsed_value
 
     for entity, entity_value in entities.items():
@@ -158,169 +165,226 @@ def parse_mission(sqm_path: str, equipment_path: str):
             "backpack": inventory.get(
                 "backpack", {"name": "None", "displayName": "None"}
             ),
-            "map": inventory.get("map", "None"),
-            "compass": inventory.get("compass", "None"),
-            "watch": inventory.get("watch", "None"),
+            "map": inventory.get(
+                "map",
+                (
+                    variables["_mapsForEveryone"][0]
+                    if variables["_mapsForEveryone"][1]
+                    else "None"
+                ),
+            ),
+            "compass": inventory.get(
+                "compass",
+                (
+                    variables["_compassesForEveryone"][0]
+                    if variables["_compassesForEveryone"][1]
+                    else "None"
+                ),
+            ),
+            "watch": inventory.get(
+                "watch",
+                (
+                    (
+                        variables["_handWatchesForEveryone"][0]
+                        if variables["_handWatchesForEveryone"][1]
+                        else "None"
+                    )
+                    if inventory.get(
+                        "radio",
+                        (
+                            variables["_radiosForEveryone"][0]
+                            if variables["_radiosForEveryone"][1]
+                            else "None"
+                        ),
+                    )
+                    not in PROGRAMMER_REQUIRED_RADIOS
+                    else "TFAR_microdagr"
+                ),
+            ),
             "goggles": inventory.get("goggles", "None"),
-            "radio": inventory.get("radio", "None"),
+            "radio": inventory.get(
+                "radio",
+                (
+                    variables["_radiosForEveryone"][0]
+                    if (
+                        variables["_radiosForEveryone"][1]
+                        or variables["_radioProgrammersForEveryone"]
+                    )
+                    else "None"
+                ),
+            ),
             "headgear": inventory.get("headgear", "None"),
-            "binocular": inventory.get("binocular", {"name": "None"}),
-            "gps": inventory.get("gps", "None"),
+            "binocular": inventory.get(
+                "binocular",
+                {
+                    "name": (
+                        variables["_binocularsForEveryone"][0]
+                        if variables["_binocularsForEveryone"][1]
+                        else "None"
+                    )
+                },
+            ),
+            "gps": inventory.get(
+                "gps",
+                (
+                    variables["_GPSsForEveryone"][0]
+                    if variables["_GPSsForEveryone"][1]
+                    else "None"
+                ),
+            ),
+            "hmd": inventory.get("hmd", "None"),
         }
 
-        if inventory.get("uniform"):
-            uniform = inventory["uniform"]
-            items = []
-            for cargo in CARGO_NAMES:
-                if cargo in uniform:
-                    if "items" in uniform[cargo]:
-                        del uniform[cargo]["items"]
-                    for item, item_value in uniform[cargo].items():
-                        if type(item_value) is not dict:
-                            continue
-                        name = item_value.get("name")
-                        item_dict = {"name": name}
-                        if cargo == "WeaponCargo":
-                            if "primaryMuzzleMag" in item_value:
-                                primary_muzzle_mag = item_value["primaryMuzzleMag"]
-                                item_dict["primaryMuzzleMag"] = {
-                                    "name": primary_muzzle_mag.get("name"),
-                                    "displayName": item_data.get(
-                                        primary_muzzle_mag.get("name")
-                                    ),
-                                    "count": primary_muzzle_mag.get("count"),
-                                }
-                            if "secondaryMuzzleMag" in item_value:
-                                primary_muzzle_mag = item_value["secondaryMuzzleMag"]
-                                item_dict["secondaryMuzzleMag"] = {
-                                    "name": primary_muzzle_mag.get("name"),
-                                    "displayName": item_data.get(
-                                        primary_muzzle_mag.get("name")
-                                    ),
-                                    "count": primary_muzzle_mag.get("count"),
-                                }
-                        if name is not None:
-                            display_name = item_data.get(name)
-                            item_dict["displayName"] = display_name
-                        count = item_value.get("count")
-                        if count is not None:
-                            item_dict["count"] = count
-                        items.append(item_dict)
+        # Uniform
+        uniform = inventory["uniform"]
+        items = []
+        for cargo in CARGO_NAMES:
+            if cargo in uniform:
+                if "items" in uniform[cargo]:
+                    del uniform[cargo]["items"]
+                for item, item_value in uniform[cargo].items():
+                    if type(item_value) is not dict:
+                        continue
+                    name = item_value.get("name")
+                    item_dict = {"name": name}
+                    if cargo == "WeaponCargo":
+                        if "primaryMuzzleMag" in item_value:
+                            primary_muzzle_mag = item_value["primaryMuzzleMag"]
+                            item_dict["primaryMuzzleMag"] = {
+                                "name": primary_muzzle_mag.get("name"),
+                                "displayName": item_data.get(
+                                    primary_muzzle_mag.get("name")
+                                ),
+                                "count": primary_muzzle_mag.get("count"),
+                            }
+                        if "secondaryMuzzleMag" in item_value:
+                            primary_muzzle_mag = item_value["secondaryMuzzleMag"]
+                            item_dict["secondaryMuzzleMag"] = {
+                                "name": primary_muzzle_mag.get("name"),
+                                "displayName": item_data.get(
+                                    primary_muzzle_mag.get("name")
+                                ),
+                                "count": primary_muzzle_mag.get("count"),
+                            }
+                    if name is not None:
+                        display_name = item_data.get(name)
+                        item_dict["displayName"] = display_name
+                    count = item_value.get("count")
+                    if count is not None:
+                        item_dict["count"] = count
+                    items.append(item_dict)
 
-            # Print parsed variables
-            if variables["_medicalAndMiscForEveryone"] == "true":
-                for item_name, item_count in variables["_uniformItems"]:
-                    if int(item_count) > 0:
-                        item_dict = {
-                            "name": item_name,
-                            "displayName": item_data.get(item_name),
-                            "count": item_count,
-                        }
-                        items.append(item_dict)
+        # Print parsed variables
+        if variables["_medicalAndMiscForEveryone"]:
+            for item_name, item_count in variables["_uniformItems"]:
+                if int(item_count) > 0:
+                    item_dict = {
+                        "name": item_name,
+                        "displayName": item_data.get(item_name),
+                        "count": item_count,
+                    }
+                    items.append(item_dict)
 
-            items.sort(
-                key=lambda item: str(item.get("displayName", item.get("name", "")))
-            )
-            inventory["uniform"] = {
-                "name": uniform.get("typeName"),
-                "items": items,
-                "displayName": item_data.get(inventory["uniform"].get("typeName")),
-            }
-        if inventory.get("vest"):
-            vest = inventory["vest"]
-            items = []
-            for cargo in CARGO_NAMES:
-                if cargo in vest:
-                    if "items" in vest[cargo]:
-                        del vest[cargo]["items"]
-                    for item, item_value in vest[cargo].items():
-                        if type(item_value) is not dict:
-                            continue
-                        if type(item_value) is not dict:
-                            continue
-                        name = item_value.get("name")
-                        item_dict = {"name": name}
-                        if cargo == "WeaponCargo":
-                            if "primaryMuzzleMag" in item_value:
-                                primary_muzzle_mag = item_value["primaryMuzzleMag"]
-                                item_dict["primaryMuzzleMag"] = {
-                                    "name": primary_muzzle_mag.get("name"),
-                                    "displayName": item_data.get(
-                                        primary_muzzle_mag.get("name")
-                                    ),
-                                    "count": primary_muzzle_mag.get("count"),
-                                }
-                            if "secondaryMuzzleMag" in item_value:
-                                primary_muzzle_mag = item_value["secondaryMuzzleMag"]
-                                item_dict["secondaryMuzzleMag"] = {
-                                    "name": primary_muzzle_mag.get("name"),
-                                    "displayName": item_data.get(
-                                        primary_muzzle_mag.get("name")
-                                    ),
-                                    "count": primary_muzzle_mag.get("count"),
-                                }
-                        if name is not None:
-                            display_name = item_data.get(name)
-                            item_dict["displayName"] = display_name
-                        count = item_value.get("count")
-                        if count is not None:
-                            item_dict["count"] = count
-                        items.append(item_dict)
-            items.sort(
-                key=lambda item: str(item.get("displayName", item.get("name", "")))
-            )
-            inventory["vest"] = {
-                "name": vest.get("typeName"),
-                "items": items,
-                "displayName": item_data.get(inventory["vest"].get("typeName")),
-            }
-        if inventory.get("backpack"):
-            backpack = inventory["backpack"]
-            items = []
-            for cargo in CARGO_NAMES:
-                if cargo in backpack:
-                    if "items" in backpack[cargo]:
-                        del backpack[cargo]["items"]
-                    for item, item_value in backpack[cargo].items():
-                        if type(item_value) is not dict:
-                            continue
-                        name = item_value.get("name")
-                        item_dict = {"name": name}
-                        if cargo == "WeaponCargo":
-                            if "primaryMuzzleMag" in item_value:
-                                primary_muzzle_mag = item_value["primaryMuzzleMag"]
-                                item_dict["primaryMuzzleMag"] = {
-                                    "name": primary_muzzle_mag.get("name"),
-                                    "displayName": item_data.get(
-                                        primary_muzzle_mag.get("name")
-                                    ),
-                                    "ammoLeft": primary_muzzle_mag.get("ammoLeft"),
-                                }
-                            if "secondaryMuzzleMag" in item_value:
-                                secondary_muzzle_mag = item_value["secondaryMuzzleMag"]
-                                item_dict["secondaryMuzzleMag"] = {
-                                    "name": secondary_muzzle_mag.get("name"),
-                                    "displayName": item_data.get(
-                                        secondary_muzzle_mag.get("name")
-                                    ),
-                                    "ammoLeft": secondary_muzzle_mag.get("ammoLeft"),
-                                }
-                        if name is not None:
-                            display_name = item_data.get(name)
-                            item_dict["displayName"] = display_name
-                        count = item_value.get("count")
-                        if count is not None:
-                            item_dict["count"] = count
-                        items.append(item_dict)
-            print(f"Items: {items}")
-            items.sort(
-                key=lambda item: str(item.get("displayName", item.get("name", "")))
-            )
-            inventory["backpack"] = {
-                "name": backpack.get("typeName"),
-                "items": items,
-                "displayName": item_data.get(inventory["backpack"].get("typeName")),
-            }
+        items.sort(key=lambda item: str(item.get("displayName", item.get("name", ""))))
+        inventory["uniform"] = {
+            "name": uniform.get("typeName"),
+            "items": items,
+            "displayName": item_data.get(inventory["uniform"].get("typeName")),
+        }
+
+        # Vest
+        vest = inventory["vest"]
+        items = []
+        for cargo in CARGO_NAMES:
+            if cargo in vest:
+                if "items" in vest[cargo]:
+                    del vest[cargo]["items"]
+                for item, item_value in vest[cargo].items():
+                    if type(item_value) is not dict:
+                        continue
+                    if type(item_value) is not dict:
+                        continue
+                    name = item_value.get("name")
+                    item_dict = {"name": name}
+                    if cargo == "WeaponCargo":
+                        if "primaryMuzzleMag" in item_value:
+                            primary_muzzle_mag = item_value["primaryMuzzleMag"]
+                            item_dict["primaryMuzzleMag"] = {
+                                "name": primary_muzzle_mag.get("name"),
+                                "displayName": item_data.get(
+                                    primary_muzzle_mag.get("name")
+                                ),
+                                "count": primary_muzzle_mag.get("count"),
+                            }
+                        if "secondaryMuzzleMag" in item_value:
+                            primary_muzzle_mag = item_value["secondaryMuzzleMag"]
+                            item_dict["secondaryMuzzleMag"] = {
+                                "name": primary_muzzle_mag.get("name"),
+                                "displayName": item_data.get(
+                                    primary_muzzle_mag.get("name")
+                                ),
+                                "count": primary_muzzle_mag.get("count"),
+                            }
+                    if name is not None:
+                        display_name = item_data.get(name)
+                        item_dict["displayName"] = display_name
+                    count = item_value.get("count")
+                    if count is not None:
+                        item_dict["count"] = count
+                    items.append(item_dict)
+        items.sort(key=lambda item: str(item.get("displayName", item.get("name", ""))))
+        inventory["vest"] = {
+            "name": vest.get("typeName"),
+            "items": items,
+            "displayName": item_data.get(inventory["vest"].get("typeName")),
+        }
+
+        # Backpack
+        backpack = inventory["backpack"]
+        items = []
+        for cargo in CARGO_NAMES:
+            if cargo in backpack:
+                if "items" in backpack[cargo]:
+                    del backpack[cargo]["items"]
+                for item, item_value in backpack[cargo].items():
+                    if type(item_value) is not dict:
+                        continue
+                    name = item_value.get("name")
+                    item_dict = {"name": name}
+                    if cargo == "WeaponCargo":
+                        if "primaryMuzzleMag" in item_value:
+                            primary_muzzle_mag = item_value["primaryMuzzleMag"]
+                            item_dict["primaryMuzzleMag"] = {
+                                "name": primary_muzzle_mag.get("name"),
+                                "displayName": item_data.get(
+                                    primary_muzzle_mag.get("name")
+                                ),
+                                "ammoLeft": primary_muzzle_mag.get("ammoLeft"),
+                            }
+                        if "secondaryMuzzleMag" in item_value:
+                            secondary_muzzle_mag = item_value["secondaryMuzzleMag"]
+                            item_dict["secondaryMuzzleMag"] = {
+                                "name": secondary_muzzle_mag.get("name"),
+                                "displayName": item_data.get(
+                                    secondary_muzzle_mag.get("name")
+                                ),
+                                "ammoLeft": secondary_muzzle_mag.get("ammoLeft"),
+                            }
+                    if name is not None:
+                        display_name = item_data.get(name)
+                        item_dict["displayName"] = display_name
+                    count = item_value.get("count")
+                    if count is not None:
+                        item_dict["count"] = count
+                    items.append(item_dict)
+        print(f"Items: {items}")
+        items.sort(key=lambda item: str(item.get("displayName", item.get("name", ""))))
+        inventory["backpack"] = {
+            "name": backpack.get("typeName"),
+            "items": items,
+            "displayName": item_data.get(inventory["backpack"].get("typeName")),
+        }
+
         if inventory.get("primaryWeapon"):
             if "firemode" in inventory["primaryWeapon"]:
                 inventory["primaryWeapon"]["firemode"] = inventory["primaryWeapon"][
@@ -459,92 +523,37 @@ def parse_mission(sqm_path: str, equipment_path: str):
                 "name": inventory["headgear"],
                 "displayName": item_data.get(inventory["headgear"]),
             }
-        if inventory.get("binocular", {"name": "None"}).get("name", "None") != "None":
-            inventory["binocular"]["displayName"] = item_data.get(
-                inventory["binocular"].get("name")
-            )
-        else:
-            if variables["_binocularsForEveryone"][1]:
-                inventory["binocular"] = {
-                    "name": variables["_binocularsForEveryone"][0],
-                    "displayName": item_data.get(
-                        variables["_binocularsForEveryone"][0]
-                    ),
-                }
-        if inventory.get("compass", "None") != "None":
-            inventory["compass"] = {
-                "name": inventory["compass"],
-                "displayName": item_data.get(inventory["compass"]),
-            }
-        else:
-            if variables["_compassesForEveryone"][1]:
-                inventory["compass"] = {
-                    "name": variables["_compassesForEveryone"][0],
-                    "displayName": item_data.get(variables["_compassesForEveryone"][0]),
-                }
-        if inventory.get("gps", "None") != "None":
-            inventory["gps"] = {
-                "name": inventory["gps"],
-                "displayName": item_data.get(inventory["gps"]),
-            }
-        else:
-            if variables["_GPSsForEveryone"][1]:
-                inventory["gps"] = {
-                    "name": variables["_GPSsForEveryone"][0],
-                    "displayName": item_data.get(variables["_GPSsForEveryone"][0]),
-                }
-        if inventory.get("map", "None") != "None":
-            inventory["map"] = {
-                "name": inventory["map"],
-                "displayName": item_data.get(inventory["map"]),
-            }
-        else:
-            if variables["_mapsForEveryone"][1]:
-                inventory["map"] = {
-                    "name": variables["_mapsForEveryone"][0],
-                    "displayName": item_data.get(variables["_mapsForEveryone"][0]),
-                }
-        if inventory.get("radio", "None") != "None":
-            inventory["radio"] = {
-                "name": inventory["radio"],
-                "displayName": item_data.get(inventory["radio"]),
-            }
-        else:
-            if (
-                variables["_radiosForEveryone"][1]
-                or variables["_radioProgrammersForEveryone"]
-            ):
-                inventory["radio"] = {
-                    "name": variables["_radiosForEveryone"][0],
-                    "displayName": item_data.get(variables["_radiosForEveryone"][0]),
-                }
-
-        if inventory.get("radio", {}).get("name", "None") in PROGRAMMER_REQUIRED_RADIOS:
-            inventory["watch"] = "TFAR_microdagr"
-
-        if inventory.get("watch", "None") != "None":
-            inventory["watch"] = {
-                "name": inventory["watch"],
-                "displayName": item_data.get(inventory["watch"]),
-            }
-        else:
-            if variables["_handWatchesForEveryone"][1]:
-                inventory["watch"] = {
-                    "name": variables["_handWatchesForEveryone"][0],
-                    "displayName": item_data.get(
-                        variables["_handWatchesForEveryone"][0]
-                    ),
-                }
-        if inventory.get("goggles", "None") != "None":
-            inventory["goggles"] = {
-                "name": inventory["goggles"],
-                "displayName": item_data.get(inventory["goggles"]),
-            }
-        if inventory.get("hmd", "None") != "None":
-            inventory["hmd"] = {
-                "name": inventory["hmd"],
-                "displayName": item_data.get(inventory["hmd"]),
-            }
+        inventory["binocular"]["displayName"] = item_data.get(
+            inventory["binocular"].get("name")
+        )
+        inventory["compass"] = {
+            "name": inventory["compass"],
+            "displayName": item_data.get(inventory["compass"]),
+        }
+        inventory["gps"] = {
+            "name": inventory["gps"],
+            "displayName": item_data.get(inventory["gps"]),
+        }
+        inventory["map"] = {
+            "name": inventory["map"],
+            "displayName": item_data.get(inventory["map"]),
+        }
+        inventory["radio"] = {
+            "name": inventory["radio"],
+            "displayName": item_data.get(inventory["radio"]),
+        }
+        inventory["watch"] = {
+            "name": inventory["watch"],
+            "displayName": item_data.get(inventory["watch"]),
+        }
+        inventory["goggles"] = {
+            "name": inventory["goggles"],
+            "displayName": item_data.get(inventory["goggles"]),
+        }
+        inventory["hmd"] = {
+            "name": inventory["hmd"],
+            "displayName": item_data.get(inventory["hmd"]),
+        }
 
         inventory["description"] = description
         player_inventories.append(inventory)
