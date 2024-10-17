@@ -153,7 +153,7 @@ def parse_mission(sqm_path: str, equipment_path: str):
                 "primaryWeapon", {"name": "None", "displayName": "None"}
             ),
             "secondaryWeapon": inventory.get(
-                "secondaryweapon", {"name": "None", "displayName": "None"}
+                "secondaryWeapon", {"name": "None", "displayName": "None"}
             ),
             "handgun": inventory.get(
                 "handgun", {"name": "None", "displayName": "None"}
