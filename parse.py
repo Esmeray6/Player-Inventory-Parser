@@ -189,7 +189,8 @@ def parse_mission(sqm_path: str, equipment_path: str):
                         if variables["_handWatchesForEveryone"][1]
                         else "None"
                     )
-                    if inventory.get(
+                    if "TFAR_microdagr" in PROGRAMMER_REQUIRED_RADIOS
+                    else inventory.get(
                         "radio",
                         (
                             variables["_radiosForEveryone"][0]
@@ -197,8 +198,6 @@ def parse_mission(sqm_path: str, equipment_path: str):
                             else "None"
                         ),
                     )
-                    not in PROGRAMMER_REQUIRED_RADIOS
-                    else "TFAR_microdagr"
                 ),
             ),
             "goggles": inventory.get("goggles", "None"),
@@ -206,10 +205,7 @@ def parse_mission(sqm_path: str, equipment_path: str):
                 "radio",
                 (
                     variables["_radiosForEveryone"][0]
-                    if (
-                        variables["_radiosForEveryone"][1]
-                        or variables["_radioProgrammersForEveryone"]
-                    )
+                    if variables["_radiosForEveryone"][1]
                     else "None"
                 ),
             ),
