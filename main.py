@@ -64,14 +64,12 @@ def file_upload():
         source_file.save(destination_dir)
         source_file.close()
         equipment_file = request.files.get("equipmentFile")
-        if equipment_file is None:
-            return (
-                render_template("error.html", error_string="Equipment file not found"),
-                400,
-            )
-        equipment_path = os.path.join(internal_dir, "AET_equipment.sqf")
-        equipment_file.save(equipment_path)
-        equipment_file.close()
+        if equipment_file is not None:
+            equipment_path = os.path.join(internal_dir, "AET_equipment.sqf")
+            equipment_file.save(equipment_path)
+            equipment_file.close()
+        else:
+            equipment_path = ""
 
         # os.makedirs(destination_dir, exist_ok=True)
 

@@ -45,7 +45,7 @@ def parse_mission(sqm_path: str, equipment_path: str):
     pattern = r"private\s+(\w+)\s*=\s*(.*?);"
 
     # Find all variable assignments using regular expressions
-    matches = re.findall(pattern, equipment_code, re.DOTALL)
+    matches = [] if equipment_code == "" else re.findall(pattern, equipment_code, re.DOTALL)
 
     # Dictionary to store parsed variable assignments
     variables = {}
@@ -169,7 +169,7 @@ def parse_mission(sqm_path: str, equipment_path: str):
                 "map",
                 (
                     variables["_mapsForEveryone"][0]
-                    if variables["_mapsForEveryone"][1]
+                    if variables.get("_mapsForEveryone", ["", False])[1]
                     else "None"
                 ),
             ),
@@ -177,7 +177,7 @@ def parse_mission(sqm_path: str, equipment_path: str):
                 "compass",
                 (
                     variables["_compassesForEveryone"][0]
-                    if variables["_compassesForEveryone"][1]
+                    if variables.get("_compassesForEveryone", ["", False])[1]
                     else "None"
                 ),
             ),
@@ -186,7 +186,7 @@ def parse_mission(sqm_path: str, equipment_path: str):
                 (
                     (
                         variables["_handWatchesForEveryone"][0]
-                        if variables["_handWatchesForEveryone"][1]
+                        if variables.get("_handWatchesForEveryone", ["", False])[1]
                         else "None"
                     )
                     if "TFAR_microdagr" in PROGRAMMER_REQUIRED_RADIOS
@@ -194,7 +194,7 @@ def parse_mission(sqm_path: str, equipment_path: str):
                         "radio",
                         (
                             variables["_radiosForEveryone"][0]
-                            if variables["_radiosForEveryone"][1]
+                            if variables.get("_radiosForEveryone", ["", False])[1]
                             else "None"
                         ),
                     )
@@ -205,7 +205,7 @@ def parse_mission(sqm_path: str, equipment_path: str):
                 "radio",
                 (
                     variables["_radiosForEveryone"][0]
-                    if variables["_radiosForEveryone"][1]
+                    if variables.get("_radiosForEveryone", ["", False])[1]
                     else "None"
                 ),
             ),
@@ -215,7 +215,7 @@ def parse_mission(sqm_path: str, equipment_path: str):
                 {
                     "name": (
                         variables["_binocularsForEveryone"][0]
-                        if variables["_binocularsForEveryone"][1]
+                        if variables.get("_binocularsForEveryone", ["", False])[1]
                         else "None"
                     )
                 },
@@ -224,7 +224,7 @@ def parse_mission(sqm_path: str, equipment_path: str):
                 "gps",
                 (
                     variables["_GPSsForEveryone"][0]
-                    if variables["_GPSsForEveryone"][1]
+                    if variables.get("_GPSsForEveryone", ["", False])[1]
                     else "None"
                 ),
             ),
@@ -271,8 +271,8 @@ def parse_mission(sqm_path: str, equipment_path: str):
                     items.append(item_dict)
 
         # Print parsed variables
-        if variables["_medicalAndMiscForEveryone"]:
-            for item_name, item_count in variables["_uniformItems"]:
+        if variables.get("_medicalAndMiscForEveryone", False):
+            for item_name, item_count in variables.get("_uniformItems", []):
                 if int(item_count) > 0:
                     item_dict = {
                         "name": item_name,
