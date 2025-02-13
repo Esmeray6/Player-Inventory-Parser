@@ -1,9 +1,9 @@
+import json
 import os
 import re
 import sys
-import armaclass
-import json
 
+import armaclass
 
 CARGO_NAMES = ("MagazineCargo", "ItemCargo", "WeaponCargo")
 PROGRAMMER_REQUIRED_RADIOS = ["TFAR_anprc154", "TFAR_pnr1000a", "TFAR_rf7800str"]
@@ -27,7 +27,7 @@ with open(data_file) as file:
 
 
 def parse_mission(sqm_path: str, equipment_path: str):
-    with open(sqm_path) as file:
+    with open(sqm_path, encoding="utf_8_sig") as file:
         sqm_data = armaclass.parse(file.read())
     player_inventories = []
     players = []
@@ -45,7 +45,9 @@ def parse_mission(sqm_path: str, equipment_path: str):
     pattern = r"private\s+(\w+)\s*=\s*(.*?);"
 
     # Find all variable assignments using regular expressions
-    matches = [] if equipment_code == "" else re.findall(pattern, equipment_code, re.DOTALL)
+    matches = (
+        [] if equipment_code == "" else re.findall(pattern, equipment_code, re.DOTALL)
+    )
 
     # Dictionary to store parsed variable assignments
     variables = {}
