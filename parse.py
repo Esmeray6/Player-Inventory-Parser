@@ -42,7 +42,7 @@ def parse_mission(sqm_path: str, equipment_path: str):
     with open(equipment_path) as equipment_file:
         equipment_code = equipment_file.read()
     # Regular expression pattern to extract variable assignments
-    pattern = r"private\s+(\w+)\s*=\s*(.*?);"
+    pattern = r"force\s+(\w+)\s*=\s*(.*?);"
 
     # Find all variable assignments using regular expressions
     matches = (
@@ -62,9 +62,9 @@ def parse_mission(sqm_path: str, equipment_path: str):
         )
         # Parse variable value as Python object
         parsed_value = None
-        if variable_value.startswith("[") and variable_value.endswith("]"):
+        if variable_value.startswith('"[') and variable_value.endswith(']"'):
             # Handle array values
-            array_items = variable_value[1:-1].split("],")
+            array_items = variable_value[2:-2].split("],")
             parsed_value = [
                 list(
                     map(
@@ -85,7 +85,7 @@ def parse_mission(sqm_path: str, equipment_path: str):
         elif parsed_value == "false":
             parsed_value = False
         elif type(parsed_value) is list and len(parsed_value) == 2:
-            parsed_value[1] = True if parsed_value[1] == "true" else False
+            parsed_value[1] = True if parsed_value[1] == "true" else (False if parsed_value[1] == "false" else parsed_value[1])
         variables[variable_name] = parsed_value
 
     for entity, entity_value in entities.items():
@@ -170,16 +170,21 @@ def parse_mission(sqm_path: str, equipment_path: str):
             "map": inventory.get(
                 "map",
                 (
-                    variables["_mapsForEveryone"][0]
-                    if variables.get("_mapsForEveryone", ["", False])[1]
+                    variables["AET_loadout_handler_SET_mapsForEveryone_className"]
+                    if variables.get(
+                        "AET_loadout_handler_SET_mapsForEveryone_enabled", ["", False]
+                    )
                     else "None"
                 ),
             ),
             "compass": inventory.get(
                 "compass",
                 (
-                    variables["_compassesForEveryone"][0]
-                    if variables.get("_compassesForEveryone", ["", False])[1]
+                    variables["AET_loadout_handler_SET_compassesForEveryone_className"]
+                    if variables.get(
+                        "AET_loadout_handler_SET_compassesForEveryone_enabled",
+                        ["", False],
+                    )
                     else "None"
                 ),
             ),
@@ -187,16 +192,26 @@ def parse_mission(sqm_path: str, equipment_path: str):
                 "watch",
                 (
                     (
-                        variables["_handWatchesForEveryone"][0]
-                        if variables.get("_handWatchesForEveryone", ["", False])[1]
+                        variables[
+                            "AET_loadout_handler_SET_handWatchesForEveryone_className"
+                        ]
+                        if variables.get(
+                            "AET_loadout_handler_SET_handWatchesForEveryone_enabled",
+                            ["", False],
+                        )
                         else "None"
                     )
                     if "TFAR_microdagr" in PROGRAMMER_REQUIRED_RADIOS
                     else inventory.get(
                         "radio",
                         (
-                            variables["_radiosForEveryone"][0]
-                            if variables.get("_radiosForEveryone", ["", False])[1]
+                            variables[
+                                "AET_loadout_handler_SET_radiosForEveryone_className"
+                            ]
+                            if variables.get(
+                                "AET_loadout_handler_SET_radiosForEveryone_enabled",
+                                ["", False],
+                            )
                             else "None"
                         ),
                     )
@@ -206,8 +221,10 @@ def parse_mission(sqm_path: str, equipment_path: str):
             "radio": inventory.get(
                 "radio",
                 (
-                    variables["_radiosForEveryone"][0]
-                    if variables.get("_radiosForEveryone", ["", False])[1]
+                    variables["AET_loadout_handler_SET_radiosForEveryone_className"]
+                    if variables.get(
+                        "AET_loadout_handler_SET_radiosForEveryone_enabled", ["", False]
+                    )
                     else "None"
                 ),
             ),
@@ -216,8 +233,13 @@ def parse_mission(sqm_path: str, equipment_path: str):
                 "binocular",
                 {
                     "name": (
-                        variables["_binocularsForEveryone"][0]
-                        if variables.get("_binocularsForEveryone", ["", False])[1]
+                        variables[
+                            "AET_loadout_handler_SET_binocularsForEveryone_className"
+                        ]
+                        if variables.get(
+                            "AET_loadout_handler_SET_binocularsForEveryone_enabled",
+                            ["", False],
+                        )
                         else "None"
                     )
                 },
@@ -225,8 +247,10 @@ def parse_mission(sqm_path: str, equipment_path: str):
             "gps": inventory.get(
                 "gps",
                 (
-                    variables["_GPSsForEveryone"][0]
-                    if variables.get("_GPSsForEveryone", ["", False])[1]
+                    variables["AET_loadout_handler_SET_GPSsForEveryone_className"]
+                    if variables.get(
+                        "AET_loadout_handler_SET_GPSsForEveryone_enabled", ["", False]
+                    )
                     else "None"
                 ),
             ),
@@ -272,16 +296,16 @@ def parse_mission(sqm_path: str, equipment_path: str):
                         item_dict["count"] = count
                     items.append(item_dict)
 
-        # Print parsed variables
-        if variables.get("_medicalAndMiscForEveryone", False):
-            for item_name, item_count in variables.get("_uniformItems", []):
-                if int(item_count) > 0:
-                    item_dict = {
-                        "name": item_name,
-                        "displayName": item_data.get(item_name),
-                        "count": item_count,
-                    }
-                    items.append(item_dict)
+        for item_name, item_count in variables.get(
+            "AET_loadout_handler_SET_uniformInventory", []
+        ):
+            if int(item_count) > 0:
+                item_dict = {
+                    "name": item_name,
+                    "displayName": item_data.get(item_name),
+                    "count": item_count,
+                }
+                items.append(item_dict)
 
         items.sort(key=lambda item: str(item.get("displayName", item.get("name", ""))))
         inventory["uniform"] = {
@@ -330,6 +354,18 @@ def parse_mission(sqm_path: str, equipment_path: str):
                     if count is not None:
                         item_dict["count"] = count
                     items.append(item_dict)
+
+        for item_name, item_count in variables.get(
+            "AET_loadout_handler_SET_vestInventory", []
+        ):
+            if int(item_count) > 0:
+                item_dict = {
+                    "name": item_name,
+                    "displayName": item_data.get(item_name),
+                    "count": item_count,
+                }
+                items.append(item_dict)
+
         items.sort(key=lambda item: str(item.get("displayName", item.get("name", ""))))
         inventory["vest"] = {
             "name": vest.get("typeName"),
@@ -375,7 +411,18 @@ def parse_mission(sqm_path: str, equipment_path: str):
                     if count is not None:
                         item_dict["count"] = count
                     items.append(item_dict)
-        print(f"Items: {items}")
+
+        for item_name, item_count in variables.get(
+            "AET_loadout_handler_SET_backpackInventory", []
+        ):
+            if int(item_count) > 0:
+                item_dict = {
+                    "name": item_name,
+                    "displayName": item_data.get(item_name),
+                    "count": item_count,
+                }
+                items.append(item_dict)
+
         items.sort(key=lambda item: str(item.get("displayName", item.get("name", ""))))
         inventory["backpack"] = {
             "name": backpack.get("typeName"),
