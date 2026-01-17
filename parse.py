@@ -172,7 +172,7 @@ def parse_mission(sqm_path: str, equipment_path: str):
                 (
                     variables["AET_loadout_handler_SET_mapsForEveryone_className"]
                     if variables.get(
-                        "AET_loadout_handler_SET_mapsForEveryone_enabled", ["", False]
+                        "AET_loadout_handler_SET_mapsForEveryone_enabled"
                     )
                     else "None"
                 ),
@@ -182,8 +182,7 @@ def parse_mission(sqm_path: str, equipment_path: str):
                 (
                     variables["AET_loadout_handler_SET_compassesForEveryone_className"]
                     if variables.get(
-                        "AET_loadout_handler_SET_compassesForEveryone_enabled",
-                        ["", False],
+                        "AET_loadout_handler_SET_compassesForEveryone_enabled"
                     )
                     else "None"
                 ),
@@ -196,8 +195,7 @@ def parse_mission(sqm_path: str, equipment_path: str):
                             "AET_loadout_handler_SET_handWatchesForEveryone_className"
                         ]
                         if variables.get(
-                            "AET_loadout_handler_SET_handWatchesForEveryone_enabled",
-                            ["", False],
+                            "AET_loadout_handler_SET_handWatchesForEveryone_enabled"
                         )
                         else "None"
                     )
@@ -209,8 +207,7 @@ def parse_mission(sqm_path: str, equipment_path: str):
                                 "AET_loadout_handler_SET_radiosForEveryone_className"
                             ]
                             if variables.get(
-                                "AET_loadout_handler_SET_radiosForEveryone_enabled",
-                                ["", False],
+                                "AET_loadout_handler_SET_radiosForEveryone_enabled"
                             )
                             else "None"
                         ),
@@ -223,7 +220,7 @@ def parse_mission(sqm_path: str, equipment_path: str):
                 (
                     variables["AET_loadout_handler_SET_radiosForEveryone_className"]
                     if variables.get(
-                        "AET_loadout_handler_SET_radiosForEveryone_enabled", ["", False]
+                        "AET_loadout_handler_SET_radiosForEveryone_enabled"
                     )
                     else "None"
                 ),
@@ -237,8 +234,7 @@ def parse_mission(sqm_path: str, equipment_path: str):
                             "AET_loadout_handler_SET_binocularsForEveryone_className"
                         ]
                         if variables.get(
-                            "AET_loadout_handler_SET_binocularsForEveryone_enabled",
-                            ["", False],
+                            "AET_loadout_handler_SET_binocularsForEveryone_enabled"
                         )
                         else "None"
                     )
@@ -249,7 +245,7 @@ def parse_mission(sqm_path: str, equipment_path: str):
                 (
                     variables["AET_loadout_handler_SET_GPSsForEveryone_className"]
                     if variables.get(
-                        "AET_loadout_handler_SET_GPSsForEveryone_enabled", ["", False]
+                        "AET_loadout_handler_SET_GPSsForEveryone_enabled"
                     )
                     else "None"
                 ),

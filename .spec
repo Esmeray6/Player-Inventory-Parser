@@ -9,14 +9,12 @@ a = Analysis(
         ("static/", "static"),
         ("templates/", "templates"),
         ("./data_unorganized.json", "."),
-        ("./MissionDerap.bat", "."),
-        ("./CfgConvert.exe", "."),
     ],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
-    excludes=[],
+    excludes=["pkg_resources"],
     noarchive=False,
 )
 pyz = PYZ(a.pure)

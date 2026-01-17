@@ -2,6 +2,7 @@ import os
 import shutil
 import subprocess
 import sys
+import winreg
 from gevent import monkey
 from flask import Flask, render_template
 from flask import request
@@ -73,8 +74,29 @@ def file_upload():
 
         # os.makedirs(destination_dir, exist_ok=True)
 
-        # Define the path to the batch file inside the "_internal" folder
-        batch_file_path = os.path.join(internal_dir, "MissionDerap.bat")
+        # This snippet will try to find the Arma 3 Tools path found in the Windows Registry and check if the path actually exists
+        try:
+            hkey_current_user = winreg.HKEY_CURRENT_USER
+            arma3_tools = winreg.OpenKey(
+                hkey_current_user, "Software\\Bohemia Interactive\\Arma 3 Tools"
+            )
+            tools_path = winreg.QueryValueEx(arma3_tools, "path")
+            if arma3_tools:
+                winreg.CloseKey(arma3_tools)
+            batch_file_path = os.path.join(tools_path[0], "CfgConvert", "MissionDerap.bat")
+            if not os.path.exists(batch_file_path):
+                return render_template(
+                    "error.html",
+                    error_string="Arma 3 Tools have been launched in the past but could not be found.",
+                )
+        except OSError:
+            return (
+                render_template(
+                    "error.html",
+                    error_string="Arma 3 Tools are not installed or have not been launched at least once.",
+                ),
+                400,
+            )
 
         # Run the batch file using subprocess
         subprocess.run([batch_file_path, destination_dir], shell=True)
