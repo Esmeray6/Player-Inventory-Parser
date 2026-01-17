@@ -114,6 +114,10 @@ def file_upload():
         )
     return "Incorrect", 400
 
+# An endpoint to return a mission.sqm file's contents in JSON format
+# @app.route("/json", methods=["GET"])
+# def sqm_to_json():
+#     ...
 
 @app.errorhandler(404)
 def page_not_found(error: Exception):
