@@ -68,14 +68,14 @@ def parse_mission(sqm_path: str, equipment_path: str):
             parsed_value = [
                 list(
                     map(
-                        lambda x: x.strip().strip('"'),
+                        lambda x: x.strip().strip("\"'"),
                         item.strip().strip("[]").strip("\"'").split(","),
                     )
                 )
                 for item in array_items
             ]
-            if len(parsed_value) == 1:
-                parsed_value = parsed_value[0]  # Unwrap single element arrays
+            # if len(parsed_value) == 1:
+            #     parsed_value = parsed_value[0]  # Unwrap single element arrays
         else:
             # Handle other types of values
             parsed_value = variable_value.strip().strip("\"'")
@@ -85,7 +85,11 @@ def parse_mission(sqm_path: str, equipment_path: str):
         elif parsed_value == "false":
             parsed_value = False
         elif type(parsed_value) is list and len(parsed_value) == 2:
-            parsed_value[1] = True if parsed_value[1] == "true" else (False if parsed_value[1] == "false" else parsed_value[1])
+            parsed_value[1] = (
+                True
+                if parsed_value[1] == "true"
+                else (False if parsed_value[1] == "false" else parsed_value[1])
+            )
         variables[variable_name] = parsed_value
 
     for entity, entity_value in entities.items():
@@ -171,9 +175,7 @@ def parse_mission(sqm_path: str, equipment_path: str):
                 "map",
                 (
                     variables["AET_loadout_handler_SET_mapsForEveryone_className"]
-                    if variables.get(
-                        "AET_loadout_handler_SET_mapsForEveryone_enabled"
-                    )
+                    if variables.get("AET_loadout_handler_SET_mapsForEveryone_enabled")
                     else "None"
                 ),
             ),
@@ -244,9 +246,7 @@ def parse_mission(sqm_path: str, equipment_path: str):
                 "gps",
                 (
                     variables["AET_loadout_handler_SET_GPSsForEveryone_className"]
-                    if variables.get(
-                        "AET_loadout_handler_SET_GPSsForEveryone_enabled"
-                    )
+                    if variables.get("AET_loadout_handler_SET_GPSsForEveryone_enabled")
                     else "None"
                 ),
             ),
